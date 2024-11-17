@@ -1,16 +1,23 @@
 name: Release Build
 
 on:
+  release:
+    types: [created, published]
   push:
     tags:
       - 'v*'
+    branches:
+      - main
+  workflow_dispatch:  # Allows manual trigger
 
 env:
   CARGO_TERM_COLOR: always
 
 jobs:
   build:
-    runs-on: windows-latest    # Using Windows since VS and SDK are required
+    runs-on: windows-latest
+    permissions:
+      contents: write
     
     steps:
     - uses: actions/checkout@v4
@@ -29,7 +36,7 @@ jobs:
     - name: Add WASM target
       run: rustup target add wasm32-wasip1
     
-    # Visual Studio setup with specific components
+    # Visual Studio setup
     - name: Setup Visual Studio
       uses: microsoft/setup-msbuild@v1.1
       
@@ -57,13 +64,11 @@ jobs:
     - name: Build Release
       run: cargo run --release
       
-    # Create Release
-    - name: Create Release
+    # Upload to Release
+    - name: Upload Release Assets
+      if: github.event_name == 'release'
       uses: softprops/action-gh-release@v1
       with:
-        name: Release ${{ github.ref_name }}
-        draft: false
-        prerelease: false
         files: |
           target/release/*.exe
           target/release/*.dll
