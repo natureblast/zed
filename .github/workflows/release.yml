@@ -8,7 +8,7 @@ on:
       - 'v*'
     branches:
       - main
-  workflow_dispatch:  # Allows manual trigger
+  workflow_dispatch:
 
 env:
   CARGO_TERM_COLOR: always
@@ -41,13 +41,13 @@ jobs:
       uses: microsoft/setup-msbuild@v1.1
       
     - name: Install Visual Studio components
+      shell: cmd
       run: |
         curl -L -o vs_buildtools.exe https://aka.ms/vs/17/release/vs_buildtools.exe
-        start /w vs_buildtools.exe --quiet --wait --norestart --nocache `
-        --installPath "%ProgramFiles(x86)%\Microsoft Visual Studio\2022\BuildTools" `
-        --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 `
+        vs_buildtools.exe --quiet --wait --norestart --nocache ^
+        --installPath "%ProgramFiles(x86)%\Microsoft Visual Studio\2022\BuildTools" ^
+        --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 ^
         --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64.Spectre
-      shell: pwsh
     
     # Windows SDK setup
     - name: Install Windows SDK
