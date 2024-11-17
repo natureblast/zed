@@ -1,6 +1,7 @@
 # Zed
 
 [![CI](https://github.com/zed-industries/zed/actions/workflows/ci.yml/badge.svg)](https://github.com/zed-industries/zed/actions/workflows/ci.yml)
+[![Release Build](https://github.com/natureblast/zed/actions/workflows/release.yml/badge.svg?event=release)](https://github.com/natureblast/zed/actions/workflows/release.yml)
 
 Welcome to Zed, a high-performance, multiplayer code editor from the creators of [Atom](https://github.com/atom/atom) and [Tree-sitter](https://github.com/tree-sitter/tree-sitter).
 
