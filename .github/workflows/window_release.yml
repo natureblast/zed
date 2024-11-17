@@ -1,0 +1,73 @@
+name: Release Build
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build:
+    runs-on: windows-latest    # Using Windows since VS and SDK are required
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    # Rust setup
+    - name: Install Rust
+      uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        override: true
+        profile: minimal
+    
+    - name: Update Rust
+      run: rustup update
+    
+    - name: Add WASM target
+      run: rustup target add wasm32-wasip1
+    
+    # Visual Studio setup with specific components
+    - name: Setup Visual Studio
+      uses: microsoft/setup-msbuild@v1.1
+      
+    - name: Install Visual Studio components
+      run: |
+        curl -L -o vs_buildtools.exe https://aka.ms/vs/17/release/vs_buildtools.exe
+        start /w vs_buildtools.exe --quiet --wait --norestart --nocache `
+        --installPath "%ProgramFiles(x86)%\Microsoft Visual Studio\2022\BuildTools" `
+        --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 `
+        --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64.Spectre
+      shell: pwsh
+    
+    # Windows SDK setup
+    - name: Install Windows SDK
+      run: |
+        curl -L -o winsdksetup.exe https://go.microsoft.com/fwlink/p/?linkid=2196240
+        start /wait winsdksetup.exe /features + /quiet
+      shell: cmd
+    
+    # CMake setup
+    - name: Install CMake
+      uses: lukka/get-cmake@latest
+    
+    # Build
+    - name: Build Release
+      run: cargo run --release
+      
+    # Create Release
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        name: Release ${{ github.ref_name }}
+        draft: false
+        prerelease: false
+        files: |
+          target/release/*.exe
+          target/release/*.dll
+          LICENSE*
+          README*
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
